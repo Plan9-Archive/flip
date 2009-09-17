@@ -2,7 +2,7 @@
 <div class="top-menu">
 % pagelist
 </div>
-<div align=right>
+<div style="text-align:right">
 <a href="%{echo -n `{ls -p $pages_file}%}">%{echo -n `{ls -p $pages_file}%}</a>
 </div>
 % pagethumbs
