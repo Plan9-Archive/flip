@@ -48,20 +48,14 @@ fn pagethumbs {
 }
 
 fn pagenav {
-	ls -p $pages_doc_root^/*.png | awk '
+	ls -p $pages_doc_root^/*.png | sort -n | awk '
 	   /^'^`{basename $req_path}^'\.png/{
-	      sub("\.png$", "", p);
-	      t = (p == "") ? "'^$3^'" : "'^$1^'";
-	      tt = (p == "") ? "all" : "prev";
-	      hr = (p == "") ? "." : p;
-	      print "<a title=\"" tt "\" href=\"" hr "\">" t "</a>";
+	      if(sub("\.png$", "", p))
+	      	print "<a title=\"prev\" href=\"" p "\">'$1'</a>";
 	      print "<a title=\"all\" href=\".\">'$3'</a>";
 	      getline;
-	      sub("\.png$", "", $0);
-	      t = ($0 == "") ? "'^$3^'" : "'^$2^'";
-	      tt = ($0 == "") ? "all" : "next";
-	      hr = ($0 == "") ? "." : $0;
-	      print "<a title=\"" tt "\" href=\"" hr "\">" t "</a>";
+	      if(sub("\.png$", "", $0))
+	      	print "<a title=\"next\" href=\"" $0 "\">'$2'</a>";
 	      exit;
 	   }
 	   {p = $0;}'
