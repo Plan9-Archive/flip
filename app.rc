@@ -1,0 +1,77 @@
+fn conf_enable_flip {
+    extensions=(pdf ps)
+    prev_res=150
+    thumb_res=15
+
+    pages_root=`{pwd}^'/_werc/pages'
+    mkdir -p $pages_root
+    base_path=`{basename -d $conf_wd}
+
+    conf_enable_app flip
+}
+
+fn flip_init {
+    # this could cause problems with filenames matching [0-9]+
+    pages_doc=`{echo $local_path | sed 's|/[0-9]+/?$||'}
+    if (test -f $werc_root^'/'^$pages_doc^'.'^$extensions){
+	name=`{basename $pages_doc}
+	pages_doc_root=$pages_root^'/'^$name
+	pages_file=`{ls $werc_root^'/'^$pages_doc^'.'^$extensions}
+	if (! test $pages_doc_root -nt $pages_file){
+		mkdir -p $pages_doc_root'/thumbs/'
+		pages2pngs $pages_file $pages_doc_root'/thumbs' 15
+		pages2pngs $pages_file $pages_doc_root 90
+	}
+	if (~ $pages_doc $local_path)
+		handler_body_main=pageindex
+	if not
+		handler_body_main=pageprev
+    }
+#    if not
+#	handler_body_main=()
+}
+
+fn pages2pngs {
+	gs -q -dNOPAUSE -dBATCH -s'DEVICE=png16m' -r^$3 -d'TextAlphaBits=4' -d'GraphicsAlphaBits=4' -s'OutputFile='^$2^'/%d.png' $1 
+}
+
+fn pagelist {
+	for (p in `{ls -p $pages_doc_root | sed 's/\.png//p;d' | sort -n})
+		echo '<a href="'$base_path'/'$name'/'$p'">'$p'</a>'
+}
+
+fn pagethumbs {
+	for (p in `{ls -p $pages_doc_root | sed 's/\.png//p;d' | sort -n}){
+		img='<img src="'$base_path'/_werc/pages/'$name'/thumbs/'$p'.png">'
+		echo '<a href="'$base_path'/'$name'/'$p'">'$img'</a>'
+	}
+}
+
+fn pagenav {
+	ls -p $pages_doc_root^/*.png | awk '
+	   /^'^`{basename $req_path}^'\.png/{
+	      sub("\.png$", "", p);
+	      t = (p == "") ? "'^$3^'" : "'^$1^'";
+	      tt = (p == "") ? "all" : "prev";
+	      hr = (p == "") ? "." : p;
+	      print "<a title=\"" tt "\" href=\"" hr "\">" t "</a>";
+	      print "<a title=\"all\" href=\".\">'$3'</a>";
+	      getline;
+	      sub("\.png$", "", $0);
+	      t = ($0 == "") ? "'^$3^'" : "'^$2^'";
+	      tt = ($0 == "") ? "all" : "next";
+	      hr = ($0 == "") ? "." : $0;
+	      print "<a title=\"" tt "\" href=\"" hr "\">" t "</a>";
+	      exit;
+	   }
+	   {p = $0;}'
+}
+
+fn pageindex {
+	tpl_handler apps/flip/pageindex.tpl
+}
+
+fn pageprev {
+	page_num=`{basename $req_path}
+	tpl_handler apps/flip/pageprev.tpl
+}
