@@ -67,5 +67,6 @@ fn pageindex {
 
 fn pageprev {
 	page_num=`{basename $req_path}
+	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
 	tpl_handler apps/flip/pageprev.tpl
 }
