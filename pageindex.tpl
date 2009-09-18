@@ -9,7 +9,7 @@
 %	(NR-1)%50 != 0 {next}
 %	{nf=NR+50-1}
 %	NR+50>'$page_tot' {nf='$page_tot'}
-%	{sub($0, "<a href=\"'$pages_base'/_" NR "\">(" NR "-" nf ")</a>")
+%	{sub($0, "<a href=\"'$pages_base'/" NR "-" nf "\">(" NR "-" nf ")</a>")
 %	print}'
 % }
 </div>
@@ -19,4 +19,4 @@
 % pagethumbs | sed -n $"page_num','$page_last'p'
 <br>
 % awk 'BEGIN {s=50; n='$page_num'+s; if(n<'$page_tot')
-%	print "<div style=\"text-align:right\"><a href=\"'$pages_base'/_" n "\">(next " s ")</a></div>"}'
+%	print "<div style=\"text-align:right\"><a href=\"'$pages_base'/" n "-\">(next " s ")</a></div>"}'

@@ -12,7 +12,7 @@ fn conf_enable_flip {
 
 fn flip_init {
     # this could cause problems with filenames matching [0-9]+
-    pages_doc=`{echo $local_path | sed 's|/_?[0-9]+/?$||'}
+    pages_doc=`{echo $local_path | sed 's|/[0-9]+(-[0-9]+)?/?$||'}
     if (test -f $werc_root^'/'^$pages_doc^'.'^$extensions){
 	name=`{basename $pages_doc}
 	pages_doc_root=$pages_root^'/'^$name
@@ -24,8 +24,8 @@ fn flip_init {
 	}
 	page_num=`{basename $req_path}
 	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
-	if (echo $page_num | grep -s '^_[0-9]+$'){
-		page_num=`{basename $req_path | sed 's/_//'}
+	if (echo $page_num | grep -s '^[0-9}+-[0-9]+$'){
+		page_num=`{basename $req_path | sed 's/-[0-9]+//'}
 		handler_body_main=pageindex
 	}
 	if not if (~ $pages_doc $local_path){
