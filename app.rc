@@ -12,7 +12,7 @@ fn conf_enable_flip {
 
 fn flip_init {
     # this could cause problems with filenames matching [0-9]+
-    pages_doc=`{echo $local_path | sed 's|/[0-9]+/?$||'}
+    pages_doc=`{echo $local_path | sed 's|/_?[0-9]+/?$||'}
     if (test -f $werc_root^'/'^$pages_doc^'.'^$extensions){
 	name=`{basename $pages_doc}
 	pages_doc_root=$pages_root^'/'^$name
@@ -22,10 +22,20 @@ fn flip_init {
 		pages2pngs $pages_file $pages_doc_root'/thumbs' 15
 		pages2pngs $pages_file $pages_doc_root 90
 	}
-	if (~ $pages_doc $local_path)
+	page_num=`{basename $req_path}
+	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
+	if (echo $page_num | grep -s '^_[0-9]+$'){
+		page_num=`{basename $req_path | sed 's/_//'}
 		handler_body_main=pageindex
+	}
+	if not if (~ $pages_doc $local_path){
+		page_num=1
+		handler_body_main=pageindex
+	}
 	if not
 		handler_body_main=pageprev
+	if (test $page_num -gt $page_tot)
+		handler_body_main=()
     }
 }
 
@@ -52,7 +62,7 @@ fn paginate {
 	}
 	NR==a && NR>1 {
 		printf(str, 1, "first");
-		if(n-s > 1)
+		if(n-s > 0)
 			printf(str, n-s, "(-" s ")");
 		print "|";
 	}
@@ -61,7 +71,7 @@ fn paginate {
 	}
 	NR==w && NR<=t {
 		print "|";
-		if(n+s < t)
+		if(n+s <= t)
 			printf(str, n+s, "(+" s ")");
 		printf(str, t, "last");
 	}'
@@ -89,13 +99,9 @@ fn pagenav {
 }
 
 fn pageindex {
-	page_num=1
-	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
 	tpl_handler apps/flip/pageindex.tpl
 }
 
 fn pageprev {
-	page_num=`{basename $req_path}
-	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
 	tpl_handler apps/flip/pageprev.tpl
 }
