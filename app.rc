@@ -27,8 +27,6 @@ fn flip_init {
 	if not
 		handler_body_main=pageprev
     }
-#    if not
-#	handler_body_main=()
 }
 
 fn pages2pngs {
@@ -36,8 +34,37 @@ fn pages2pngs {
 }
 
 fn pagelist {
-	for (p in `{ls -p $pages_doc_root | sed 's/\.png//p;d' | sort -n})
-		echo '<a href="'$base_path'/'$name'/'$p'">'$p'</a>'
+	ls -p $pages_doc_root | sed 's/\.png//p;d' | sort -n
+}
+
+# Usage: paginate number step total 'string %d %s'
+fn paginate {
+	awk '
+	BEGIN {
+		n='$1';
+		s='$2'; s3=int(s/3);
+		a=int(n/s3)*s3-s3;
+		if(a<1) a=1;
+		if(n>a+2*s3) a+=s3;
+		w=a+s;
+		t='$3';
+		str="'$4'";
+	}
+	NR==a && NR>1 {
+		printf(str, 1, "first");
+		if(n-s > 1)
+			printf(str, n-s, "(-" s ")");
+		print "|";
+	}
+	NR>=a && NR<w {
+		printf(str, NR, NR);
+	}
+	NR==w && NR<=t {
+		print "|";
+		if(n+s < t)
+			printf(str, n+s, "(+" s ")");
+		printf(str, t, "last");
+	}'
 }
 
 fn pagethumbs {
@@ -62,6 +89,8 @@ fn pagenav {
 }
 
 fn pageindex {
+	page_num=1
+	page_tot=`{ls $pages_doc_root^/*.png |wc -l}
 	tpl_handler apps/flip/pageindex.tpl
 }
 
