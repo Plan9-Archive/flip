@@ -14,7 +14,7 @@
 % }
 </div>
 <div style="text-align:right">
-<a href="%{echo -n `{ls -p $pages_file}%}">%{echo -n `{ls -p $pages_file}%}</a>
+<a href="%{echo -n $pages_base^'.'^`{echo $pages_file | sed 's/.*\.//'}%}">%{echo -n `{ls -p $pages_file}%}</a>
 </div>
 % pagethumbs | sed -n $"page_num','$page_last'p'
 <br>
